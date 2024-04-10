@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "decimal.js": "^10.4.3",
+    "default-passive-events": "^2.0.0",
+    "element-plus": "^2.6.3",
+    "sass": "^1.72.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {
