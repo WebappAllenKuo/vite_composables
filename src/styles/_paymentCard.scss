@@ -1,0 +1,19 @@
+.card{
+  width: 100%;
+  background: #f3f2f2;
+  box-sizing: border-box;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0px;
+  .demonstration{
+    display: block;
+    width: 20%;
+  }
+  .el-form{
+    p{
+      font-size: 10px;
+      margin: -10px 0 5px 100px;
+      color: #918e8e;
+    }
+  }
+}
