@@ -37,11 +37,9 @@
 </template>
 
 <script setup>
-import { ref,reactive, onMounted, watch } from 'vue'
+import { watch } from 'vue'
 import { CloseBold } from '@element-plus/icons-vue'
-
 import { usePaymentCard } from '@/composables/usePaymentCard'
-import Decimal from 'decimal.js'
 
 
 const { messageBox, addComma, minusComma, percentMethod } = usePaymentCard()
