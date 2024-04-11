@@ -12,11 +12,11 @@
         <h2>{{ formData.paymentState }}</h2>
         <el-button type="danger" plain @click="handleConfirm()">確認付款</el-button>
       </div>
-      <el-button v-if="deleteCard" type="danger" text circle :icon="CloseBold" @click="handleDelete()"/>
+      <el-button v-if="deleteCard" type="danger" text circle :icon="CloseBold" @click="handleDelete()" :disabled="formData.isDisabled"/>
     </div>
     <el-form label-width="auto" label-position="left" :disabled="formData.isDisabled">
       <el-form-item label="金額（整數）">
-        <el-input v-model="formData.payment" style="width: 240px" @input="handleChange(formData.payment)"/>
+        <el-input v-model="formData.payment" style="width: 240px" @input="handleChange(formData.payment)" />
       </el-form-item>
       <p v-show="!state.payState">{{ `缺${state.overPayment}元 (${state.overPercent}％)` }}</p>
       <p v-show="state.payState">{{ `超收${state.overPayment}元` }}</p>
@@ -39,11 +39,12 @@
 <script setup>
 import { ref,reactive, onMounted, watch } from 'vue'
 import { CloseBold } from '@element-plus/icons-vue'
-import { useMessageBox } from '@/composables/useMessageBox'
+
+import { usePaymentCard } from '@/composables/usePaymentCard'
 import Decimal from 'decimal.js'
 
 
-const { messageBox } = useMessageBox()
+const { messageBox, addComma, minusComma, percentMethod } = usePaymentCard()
 
 const props = defineProps({ 
   deleteCard: {
@@ -52,9 +53,10 @@ const props = defineProps({
   },
   formData: Object,
   state: Object,
-  currentPayment: Function,
+  courtPayment: Function,
   minusPayment: Function,
-  minusPercent: Function
+  minusPercent: Function,
+  clear: Function
 })
 
 const emit = defineEmits(['delete:deleteItem'])
@@ -67,7 +69,8 @@ const handleConfirm = () => {
   messageBox('確認付款？', '已付款成功', '已取消付款', ()=>{
     props.formData.paymentState = '已付款'
     props.formData.isDisabled = true
-    props.currentPayment()
+    props.courtPayment()
+    props.clear()
   })
 }
 
@@ -77,17 +80,17 @@ const deleteItem = () => emit('delete:deleteItem')
 
 // 帶入金額時計算百分比
 const updatePercent = (val) => {
-  val = val.replace(/,/g, '') * 1
-  const totalPayment = props.state.total.replace(/,/g, '') * 1 || 0
-  const newPercent = val ? new Decimal(val).div(totalPayment).times(100).toFixed(6) : 0
+  val = minusComma(val)
+  const totalPayment = minusComma(props.state.total)
+  const newPercent = percentMethod(val, totalPayment, 100, 6)
   props.formData.percent = newPercent
 }
 
 //帶入百分比計算金額
 const updatePayment = (val) => {
-  val = val.replace(/,/g, '') * 1
-  const totalPayment = props.state.total.replace(/,/g, '') * 1 || 0
-  const newPayment = val ? new Decimal(val).div(100).times(totalPayment).toFixed(0) : 0
+  val = minusComma(val)
+  const totalPayment = minusComma(props.state.total)
+  const newPayment = percentMethod(val, 100, totalPayment, 0)
   props.formData.payment = newPayment
 }
 
@@ -101,16 +104,15 @@ const handleDelete = () => {
 //
 const handleChange = (val) => {
   updatePercent(val)
-  addComma(val)
+  commaChange(val)
 }
 
-//composabled
-const addComma = (num) => {
-  num = num.replace(/,/g, '') * 1
-  let newNum = num.toLocaleString('zh', { style: 'decimal' })
-  props.formData.payment = newNum
+//新增comma
+const commaChange = (val) =>{
+  let num = minusComma(val)
+  num = addComma(num)
+  props.formData.payment = num
 }
-
 
 
 
@@ -127,7 +129,7 @@ watch(
 watch(
   () => props.formData.payment,
   () => {
-    addComma(props.formData.payment)
+    commaChange(props.formData.payment)
     props.minusPayment()
     props.minusPercent()
   }
