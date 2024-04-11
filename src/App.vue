@@ -3,7 +3,7 @@
     <div class="row horizontal">
       <div class="row horizontal v_center">
         <h2>支付總金額：</h2>
-        <el-input v-model="state.total" style="width: 150px" @input="addComma()"/>
+        <el-input v-model="state.total" style="width: 150px" @input="commaChange()" :disabled="state.paymentFinish"/>
       </div>
       <el-button type="info" plain @click="addPaymentCard()">新增支付項目＋</el-button>
     </div>
@@ -12,9 +12,10 @@
       :deleteCard="i !== state.cardList.length - 1" 
       :formData="item" 
       :state="state"
-      :currentPayment="currentPayment" 
+      :courtPayment="courtPayment" 
       :minusPayment="minusPayment"
       :minusPercent="minusPercent"
+      :clear="clear"
       @delete:delete-item="deleteItem(i)"
     />
     <hr/>
@@ -26,13 +27,14 @@
         </div>
         <div>
           <h1 data-space-bottom="1.5rem">付款次數 / 剩餘款項</h1>
-          <span>{{ `${paymentNum} / ` }}</span>
-          <span>{{ state.overPayment }}</span>
+          <span>{{ `${paymentNum}次` }}</span>
+          <span v-show="!state.payState">{{ ` ( 缺${state.overPayment}元 )` }}</span>
+          <span v-show="state.payState">{{ ` ( 超收${state.overPayment}元 )` }}</span>
         </div>
       </div>
-      <div class="row vertical bottom_right">
-        <el-button type="danger">Submit</el-button>
-        <h2 data-space-top="3rem" v-if="state.paymentFinish === true">已支付所有金額！</h2>
+      <div class="row vertical bottom_right" data-width="60%">
+        <el-button type="danger" :disabled="!state.paymentFinish" @click="state.isFinish = true">Submit</el-button>
+        <h2 data-space-top="3rem" v-if="state.isFinish">已支付所有金額！</h2>
       </div>
     </div>
   </div>
@@ -41,22 +43,23 @@
 
 <script setup>
 
-import Decimal from 'decimal.js';
 import paymentCard from './components/paymentCard.vue'
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { usePaymentCard } from '@/composables/usePaymentCard'
+import { reactive, onMounted, computed } from 'vue'
 
 
 const addList = onMounted(() => state.cardList.push(paymentForm))
+const { addComma, minusComma, percentMethod } = usePaymentCard()
 
 const state = reactive({
-  total: '',
+  total: '',    //應付總金額
   cardList: [],
-  paymentFinish: false,
-  currentPayment: 0,
-  balance: '',
-  overPayment: 0,
+  paymentFinish: false,   //總金額的之狀態
+  currentPayment: 0,  //當前已支付之金額
+  overPayment: 0,  //所要付之金額差額
   overPercent: 0,
-  payState: false
+  payState: false, //付款狀態
+  isFinish: false  //支付完成之狀態
 })
 
 const paymentForm = reactive({
@@ -77,43 +80,38 @@ const addPaymentCard = () => {
     percent: 0,
     time: '',
     deleteCard: true,
-    paymentState: '未付款'
+    paymentState: '未付款',
+    isDisabled: false,
   }
   state.cardList.unshift(newFormData)
 }
 
 //計算已支付金額
-const currentPayment = () => {
+const courtPayment = () => {
   state.currentPayment = 0
-  for(let i in state.cardList){
-    state.currentPayment += state.cardList[i].payment.replace(/,/g, '') * 1
-  }
-  state.currentPayment = state.currentPayment.toLocaleString('zh', { style: 'decimal' })
+  for(let i in state.cardList) state.currentPayment += minusComma(state.cardList[i].payment)
+  state.currentPayment = addComma(state.currentPayment)
 }
 
-//計算缺額
+//計算是缺額還是超收
 const minusPayment = () => {
-  currentPayment()
-  let current = state.total.replace(/,/g, '') * 1 - state.currentPayment.replace(/,/g, '') * 1
-  state.overPayment = current.toLocaleString('zh', { style: 'decimal' })
+  courtPayment()
+  let current = minusComma(state.total) - minusComma(state.currentPayment)
+  state.overPayment = addComma(current)
   if(current < 0){
-    state.overPayment = Math.abs(state.overPayment.replace(/,/g, '') * 1).toLocaleString('zh', { style: 'decimal' })
+    state.overPayment = addComma(Math.abs(minusComma(state.overPayment)))
     state.payState = true
   }else state.payState = false
 }
 
 //計算缺百分比
 const minusPercent = () => {
-  let total = state.total.replace(/,/g, '') * 1 
-  let percent = state.overPayment.replace(/,/g, '') * 1 
-  state.overPercent = percent ? new Decimal(percent).div(total).times(100).toFixed(6) : 0
+  let total = minusComma(state.total)
+  let percent = minusComma(state.overPayment)
+  state.overPercent = percentMethod(percent, total, 100, 6)
 }
 
-
-
-
-
-//計算支付次數
+//計算總支付次數
 const paymentNum = computed(() => {
   let current = 0
   current = state.cardList.length
@@ -121,17 +119,19 @@ const paymentNum = computed(() => {
 })
 
 
-
+//刪除某特定支付款項
 const deleteItem = (index) => state.cardList.splice(index, 1)
 
-
-
-const addComma = () => {
-  state.total = state.total.replace(/,/g, '') * 1
-  let newNum = state.total.toLocaleString('zh', { style: 'decimal' })
-  state.total = newNum
+const clear = () => {
+  if(state.total == state.currentPayment) state.paymentFinish = true
 }
 
+//新增comma
+const commaChange = () =>{
+  let num = minusComma(state.total)
+  num = addComma(num)
+  state.total = num
+}
 
 
 </script>
