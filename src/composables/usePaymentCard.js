@@ -24,13 +24,20 @@ export function usePaymentCard(){
       })
   }
 	
+  // 去掉comma
 	const minusComma = (val) => {
 		let num = val ? val.replace(/,/g, '') * 1 : 0
 		return num
 	}
-
+  // 每三位數增加comma
 	const addComma = (val) => {
 		let num = val ? val.toLocaleString('zh', { style: 'decimal' }) : 0
+		return num
+	}
+
+  // 轉換成正整數
+	const handleInteger  = (val) => {
+		let num = val ? val.replace(/[^\d]/g, '') : ''
 		return num
 	}
 
@@ -40,5 +47,5 @@ export function usePaymentCard(){
 	}
 
 
-  return { messageBox, addComma, minusComma, percentMethod }
+  return { messageBox, addComma, minusComma, percentMethod, handleInteger }
 }
