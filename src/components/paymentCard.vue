@@ -18,8 +18,8 @@
       <el-form-item label="金額（整數）">
         <el-input v-model="formData.payment" style="width: 240px" @input="handleChange(formData.payment)" />
       </el-form-item>
-      <p v-show="!state.payState">{{ `缺${state.overPayment}元 (${state.overPercent}％)` }}</p>
-      <p v-show="state.payState">{{ `超收${state.overPayment}元` }}</p>
+      <p v-show="state.payState == '缺少'">{{ `缺${state.overPayment}元 (${state.overPercent}％)` }}</p>
+      <p v-show="state.payState == '超收'">{{ `超收${state.overPayment}元` }}</p>
       <el-form-item label="所佔百分比">
         <el-input v-model="formData.percent" style="width: 240px" @input="updatePayment(formData.percent)"/>
         <span data-space-left="0.5rem">%</span>
@@ -42,7 +42,7 @@ import { CloseBold } from '@element-plus/icons-vue'
 import { usePaymentCard } from '@/composables/usePaymentCard'
 
 
-const { messageBox, addComma, minusComma, percentMethod } = usePaymentCard()
+const { messageBox, addComma, minusComma, percentMethod, handleInteger } = usePaymentCard()
 
 const props = defineProps({ 
   deleteCard: {
@@ -67,8 +67,9 @@ const handleConfirm = () => {
   messageBox('確認付款？', '已付款成功', '已取消付款', ()=>{
     props.formData.paymentState = '已付款'
     props.formData.isDisabled = true
-    props.courtPayment()
+    props.state.confirmPayment = props.state.currentPayment
     props.clear()
+    props.state.confirmCount ++
   })
 }
 
@@ -78,6 +79,7 @@ const deleteItem = () => emit('delete:deleteItem')
 
 // 帶入金額時計算百分比
 const updatePercent = (val) => {
+  val = handleInteger(val)
   val = minusComma(val)
   const totalPayment = minusComma(props.state.total)
   const newPercent = percentMethod(val, totalPayment, 100, 6)
@@ -86,9 +88,9 @@ const updatePercent = (val) => {
 
 //帶入百分比計算金額
 const updatePayment = (val) => {
-  val = minusComma(val)
+  props.formData.percent = val.replace(/[^\d.]/g, '').replace(/^0+(?=\d)/g, '')
   const totalPayment = minusComma(props.state.total)
-  const newPayment = percentMethod(val, 100, totalPayment, 0)
+  const newPayment = percentMethod(props.formData.percent, 100, totalPayment, 0)
   props.formData.payment = newPayment
 }
 
@@ -99,7 +101,7 @@ const handleDelete = () => {
   })
 }
 
-//
+//改變金額input時觸發
 const handleChange = (val) => {
   updatePercent(val)
   commaChange(val)
@@ -107,7 +109,8 @@ const handleChange = (val) => {
 
 //新增comma
 const commaChange = (val) =>{
-  let num = minusComma(val)
+  let num = handleInteger(val)
+  num = minusComma(num)
   num = addComma(num)
   props.formData.payment = num
 }
