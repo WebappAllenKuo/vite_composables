@@ -1,8 +1,9 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { reactive } from 'vue'
 import Decimal from 'decimal.js';
 
 
-export function usePaymentCard(){
+export function usePaymentCard(val){
   const messageBox = (detail, success, confirm, callBack) => {
     ElMessageBox.confirm(detail, '警告', {
       confirmButtonText: '確定',
@@ -46,6 +47,14 @@ export function usePaymentCard(){
 		return num
 	}
 
+  //管理總金額
+  const confirmState = reactive({
+    total: 0,
+    
+    increment(amount){
+      confirmState.total += amount
+    },
+  })
 
-  return { messageBox, addComma, minusComma, percentMethod, handleInteger }
+  return { messageBox, addComma, minusComma, percentMethod, handleInteger, confirmState }
 }
