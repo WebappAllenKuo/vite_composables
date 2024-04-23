@@ -51,36 +51,32 @@ const props = defineProps({
   },
   formData: Object,
   state: Object,
-  courtPayment: Function,
-  minusPayment: Function,
-  minusPercent: Function,
-  clear: Function
+  finish: Function,
+  overPayment: Function
 })
 
-const emit = defineEmits(['delete:deleteItem'])
+const emit = defineEmits(['delete:deleteItem', 'add:addTotal', 'selected'])
 
 //付款時間選擇區間（不可選今天之前的）
 const disabledDate = (time) => { return time.getTime() < Date.now() - 86400000 }
+
+const deleteItem = () => emit('delete:deleteItem')
+const addTotal = () => emit('add:addTotal')
 
 //確認付款
 const handleConfirm = () => {
   messageBox('確認付款？', '已付款成功', '已取消付款', ()=>{
     props.formData.paymentState = '已付款'
     props.formData.isDisabled = true
-    props.state.confirmPayment = props.state.currentPayment
-    props.clear()
     props.state.confirmCount ++
+    addTotal()
+    props.finish()
   })
 }
 
-//把資料傳給父組件來刪除其陣列內資料
-const deleteItem = () => emit('delete:deleteItem')
-
-
 // 帶入金額時計算百分比
 const updatePercent = (val) => {
-  val = handleInteger(val)
-  val = minusComma(val)
+  val = minusComma(handleInteger(val))
   const totalPayment = minusComma(props.state.total)
   const newPercent = percentMethod(val, totalPayment, 100, 6)
   props.formData.percent = newPercent
@@ -109,32 +105,18 @@ const handleChange = (val) => {
 
 //新增comma
 const commaChange = (val) =>{
-  let num = handleInteger(val)
-  num = minusComma(num)
-  num = addComma(num)
+  let num = addComma(minusComma(handleInteger(val)))
   props.formData.payment = num
 }
 
 
 
 
-watch(
-  () => props.state.total,
-  () => {
+watch(() => props.state.total, () => {
     updatePercent(props.formData.payment)
-    props.minusPayment()
-    props.minusPercent()
   }
 )
 
-watch(
-  () => props.formData.payment,
-  () => {
-    commaChange(props.formData.payment)
-    props.minusPayment()
-    props.minusPercent()
-  }
-)
 
 
 </script>
