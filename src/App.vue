@@ -152,7 +152,11 @@ const addTotal = (index) => {
 }
 
 const finish = () => {
-  if(state.total == state.confirmPayment && state.total !== 0) state.paymentFinish = true
+  if(state.total == state.confirmPayment && state.total !== 0){
+    state.paymentFinish = true
+  }else{
+    state.paymentFinish = false
+  }
 }
 
 //新增comma
