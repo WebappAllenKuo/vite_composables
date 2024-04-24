@@ -3,7 +3,7 @@
     <div class="row horizontal">
       <div class="row horizontal v_center">
         <h2>支付總金額：</h2>
-        <el-input v-model="state.total" style="width: 150px" @input="commaChange(state.total)" :disabled="state.paymentFinish"/>
+        <el-input v-model="state.total" style="width: 150px" @input="commaChange(state.total)" :disabled="state.isFinish"/>
       </div>
       <el-button type="info" plain @click="addPaymentCard()">新增支付項目＋</el-button>
     </div>
