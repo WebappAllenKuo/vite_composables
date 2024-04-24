@@ -87,7 +87,10 @@ const addPaymentCard = () => {
 }
 
 //刪除某特定支付款項
-const deleteItem = (index) => state.cardList.splice(index, 1)
+const deleteItem = (index) => {
+  state.cardList.splice(index, 1)
+  ElMessage.success('已刪除成功！')
+}
 
 //計算總支付次數
 const paymentNum = computed(() => {
@@ -143,7 +146,7 @@ const overPayment = () => {
 }
 
 //獲取確認付款之指定資料
-const addTotal = (index,cb) => {
+const addTotal = (index, cb) => {
   let num = minusComma(state.cardList[index].payment)
   let total = minusComma(state.total)
   confirmState.increment(num)
@@ -152,10 +155,13 @@ const addTotal = (index,cb) => {
     state.confirmPayment = addComma(confirmState.total)
     overPayment()
     state.confirmCount ++
+    state.cardList[index].paymentState = '已付款'
+    state.cardList[index].isDisabled = true
+    finish()
+    ElMessage.success('已付款成功')
   }else{
     ElMessage.error('已支付金額超額，請重新輸入')
     confirmState.total -= num
-    cb(new Error())
   }
 }
 
