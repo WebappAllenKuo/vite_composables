@@ -111,6 +111,7 @@ const balancePercent = () => {
   state.overPercent = percentMethod(percent, total, 100, 6)
 }
 
+//共用邏輯計算金額差額
 const calculatePayment = (total, num) => {
   let current = minusComma(total) - minusComma(num)
   let res = {
@@ -127,48 +128,26 @@ const calculatePayment = (total, num) => {
   return res
 }
 
+//是算所有子組件的金額是缺額還是超收
 const balancePayment = () => {
+  courtPayment()
   const { overPayment, payState } = calculatePayment(state.total, state.currentPayment)
   state.overPayment = overPayment
   state.payState = payState
 }
 
+//獲取確認付款之差額
 const overPayment = () => {
   const { overPayment, payState } = calculatePayment(state.total, state.confirmPayment)
   state.confirmOverPayment = overPayment
   state.confirmPayState = payState
 }
 
-// //是算所有子組件的金額是缺額還是超收
-// const balancePayment = (total, num) => {
-//   let current = minusComma(total) - minusComma(num)
-//   if(current < 0){
-//     state.overPayment = addComma(Math.abs(current))
-//     state.payState = '超收'
-//   }else if(current > 0){
-//     state.overPayment = addComma(current)
-//     state.payState = '缺少'
-//   }else state.payState = ''
-// }
-
-// //獲取確認付款之差額
-// const overPayment = (total, num) => {
-//   let current = minusComma(total) - minusComma(num)
-//   if(current < 0){
-//     state.confirmOverPayment = addComma(Math.abs(current))
-//     state.confirmPayState = '超收'
-//   }else if(current > 0){
-//     state.confirmOverPayment = addComma(current)
-//     state.confirmPayState = '缺少' 
-//   }else state.confirmPayState = ''
-// }
-
 //獲取確認付款之指定資料
 const addTotal = (index) => {
   let num = minusComma(state.cardList[index].payment)
   confirmState.increment(num)
   state.confirmPayment = addComma(confirmState.total)
-  //overPayment(state.total, state.confirmPayment)
   overPayment()
 }
 
@@ -184,19 +163,14 @@ const commaChange = (num) => {
 
 
 watch(() => state.total, () => {
-  courtPayment()
-  //balancePayment(state.total, state.currentPayment)
   balancePayment()
   balancePercent()
   overPayment()
-  //overPayment(state.total, state.confirmPayment)
   finish()
 })
 
 watch(() => state.cardList, () => {
-  courtPayment()
   balancePayment()
-  //balancePayment(state.total, state.currentPayment)
   balancePercent()
 }, { deep: true })
 
