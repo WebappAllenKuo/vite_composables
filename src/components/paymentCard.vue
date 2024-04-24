@@ -110,8 +110,6 @@ const commaChange = (val) =>{
 }
 
 
-
-
 watch(() => props.state.total, () => {
     updatePercent(props.formData.payment)
   }
