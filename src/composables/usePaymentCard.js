@@ -4,7 +4,7 @@ import Decimal from 'decimal.js';
 
 
 export function usePaymentCard(val){
-  const messageBox = (detail, success, confirm, callBack) => {
+  const messageBox = (detail, confirm, callBack) => {
     ElMessageBox.confirm(detail, '警告', {
       confirmButtonText: '確定',
       cancelButtonText: '取消',
@@ -12,16 +12,9 @@ export function usePaymentCard(val){
     })
     .then((res) => {
       callBack(res)
-      ElMessage({
-        type: 'success',
-        message: success
-      })
     })
     .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: confirm
-      })
+      ElMessage({ type: 'info', message: confirm})
     })
   }
 	
