@@ -13,7 +13,6 @@
       :formData="item" 
       :state="state"
       :finish="finish"
-      :overPayment="overPayment"
       @delete:delete-item="deleteItem(i)"
       @add:add-total="addTotal(i)"
     />
@@ -27,7 +26,6 @@
         <h1 data-space-bottom="1.5rem">付款次數 / 剩餘款項</h1>
         <span>{{ `${state.confirmCount}/${paymentNum}` }}</span>
         <span v-show="state.confirmPayState == '缺少'">{{ ` ( 缺${state.confirmOverPayment}元 )` }}</span>
-        <span v-show="state.confirmPayState == '超收'">{{ ` ( 超收${state.confirmOverPayment}元 )` }}</span>
       </div>
       <div class="row vertical h_end" data-width="35%">
         <el-button type="danger" :disabled="!state.paymentFinish" @click="state.isFinish = true">Submit</el-button>
@@ -43,6 +41,7 @@
 import paymentCard from './components/paymentCard.vue'
 import { usePaymentCard } from '@/composables/usePaymentCard'
 import { reactive, onMounted, computed, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 
 const addList = onMounted(() => state.cardList.push(paymentForm))
@@ -144,12 +143,22 @@ const overPayment = () => {
 }
 
 //獲取確認付款之指定資料
-const addTotal = (index) => {
+const addTotal = (index,cb) => {
   let num = minusComma(state.cardList[index].payment)
+  let total = minusComma(state.total)
   confirmState.increment(num)
-  state.confirmPayment = addComma(confirmState.total)
-  overPayment()
+
+  if(confirmState.total <= total){
+    state.confirmPayment = addComma(confirmState.total)
+    overPayment()
+    state.confirmCount ++
+  }else{
+    ElMessage.error('已支付金額超額，請重新輸入')
+    confirmState.total -= num
+    cb(new Error())
+  }
 }
+
 
 const finish = () => {
   if(state.total == state.confirmPayment && state.total !== 0){
