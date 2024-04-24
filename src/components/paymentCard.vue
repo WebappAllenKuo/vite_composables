@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" >
     <div class="row horizontal v_center" data-space-bottom="1.5rem">
       <div class="row horizontal v_center">
         <p data-space-right="1rem">支付方式</p>
@@ -10,7 +10,7 @@
       </div>
       <div class="row horizontal space_evenly center">
         <h2>{{ formData.paymentState }}</h2>
-        <el-button type="danger" plain @click="handleConfirm()">確認付款</el-button>
+        <el-button :disabled="formData.isDisabled" type="danger" plain @click="handleConfirm()">確認付款</el-button>
       </div>
       <el-button v-if="deleteCard" type="danger" text circle :icon="CloseBold" @click="handleDelete()" :disabled="formData.isDisabled"/>
     </div>
@@ -51,11 +51,10 @@ const props = defineProps({
   },
   formData: Object,
   state: Object,
-  finish: Function,
-  overPayment: Function
+  finish: Function
 })
 
-const emit = defineEmits(['delete:deleteItem', 'add:addTotal', 'selected'])
+const emit = defineEmits(['delete:deleteItem', 'add:addTotal'])
 
 //付款時間選擇區間（不可選今天之前的）
 const disabledDate = (time) => { return time.getTime() < Date.now() - 86400000 }
@@ -66,10 +65,11 @@ const addTotal = () => emit('add:addTotal')
 //確認付款
 const handleConfirm = () => {
   messageBox('確認付款？', '已付款成功', '已取消付款', ()=>{
+    addTotal((error)=>{
+      if(error) return
+    })
     props.formData.paymentState = '已付款'
     props.formData.isDisabled = true
-    props.state.confirmCount ++
-    addTotal()
     props.finish()
   })
 }
@@ -108,7 +108,6 @@ const commaChange = (val) =>{
   let num = addComma(minusComma(handleInteger(val)))
   props.formData.payment = num
 }
-
 
 watch(() => props.state.total, () => {
     updatePercent(props.formData.payment)
