@@ -64,13 +64,8 @@ const addTotal = () => emit('add:addTotal')
 
 //確認付款
 const handleConfirm = () => {
-  messageBox('確認付款？', '已付款成功', '已取消付款', ()=>{
-    addTotal((error)=>{
-      if(error) return
-    })
-    props.formData.paymentState = '已付款'
-    props.formData.isDisabled = true
-    props.finish()
+  messageBox('確認付款？', '已取消付款', () => {
+    addTotal()
   })
 }
 
@@ -92,7 +87,7 @@ const updatePayment = (val) => {
 
 // 刪除確認
 const handleDelete = () => {
-  messageBox('確認刪除？', '已刪除成功', '已取消刪除', ()=>{
+  messageBox('確認刪除？', '已取消刪除', () => {
     deleteItem()
   })
 }
