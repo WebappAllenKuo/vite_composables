@@ -10,19 +10,19 @@ export function usePaymentCard(val){
       cancelButtonText: '取消',
       type: 'warning'
     })
-      .then((res) => {
-        callBack(res)
-        ElMessage({
-          type: 'success',
-          message: success
-        })
+    .then((res) => {
+      callBack(res)
+      ElMessage({
+        type: 'success',
+        message: success
       })
-      .catch(() => {
-        ElMessage({
-          type: 'info',
-          message: confirm
-        })
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: confirm
       })
+    })
   }
 	
   // 去掉comma
