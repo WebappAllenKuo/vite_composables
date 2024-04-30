@@ -13,8 +13,8 @@ const routes = [
         component: () => import('../components/composables.vue'),
       },
       {
-        path: 'direactive',
-        name: 'Direactive',
+        path: 'directive',
+        name: 'Directive',
         component: () => import('../components/directive.vue'),
       },
       {
