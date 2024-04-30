@@ -3,13 +3,19 @@
 	padding: 30px 40px;
 	position: relative;
 	box-sizing: border-box;
-	.home{
+	height: 100vh;
+	.composables{
     box-sizing: border-box;
-		width: 600px;
-		height: 100%;
+		min-width: 600px;
+		height: 92vh;
+		overflow: auto;
+		body::-webkit-scrollbar { 
+			display: none; 
+		}
     h1{
     	font-size: 18px;
     	line-height: 1.5;
     }
 	}
+
 }
