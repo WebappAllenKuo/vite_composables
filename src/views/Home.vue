@@ -3,18 +3,18 @@
     <el-col :span="4" class="navigator">
       <h5 class="mb-2">Category</h5>
       <el-menu
-        default-active="1"
+        :default-active = index
         class="el-menu-vertical-demo"
       >
-        <el-menu-item index="1" @click="routerChange('Composables')">
+        <el-menu-item index="Composables" @click="routerChange('Composables')">
           <el-icon><document/></el-icon>
           <span>Composables</span>
         </el-menu-item>
-        <el-menu-item index="2" @click="routerChange('Directive')">
+        <el-menu-item index="Directive" @click="routerChange('Directive')">
           <el-icon><document/></el-icon>
           <span>Directive</span>
         </el-menu-item>
-        <el-menu-item index="3" @click="routerChange('Final')">
+        <el-menu-item index="Final" @click="routerChange('Final')">
           <el-icon><document/></el-icon>
           <span>Final</span>
         </el-menu-item>
@@ -25,10 +25,17 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Document, Menu as IconMenu } from '@element-plus/icons-vue'
 
 const router = useRouter()
+let index = computed(()=>{
+  return router.currentRoute.value.name
+})
 
-const routerChange = (path) => router.push({ name: path }) 
+const routerChange = (path) => {
+  router.push({ name: path })
+}
+
 </script>
