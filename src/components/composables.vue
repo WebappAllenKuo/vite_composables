@@ -1,6 +1,6 @@
 <template>
   <div class="composables">
-    <div class="row horizontal">
+    <div class="row horizontal" style="width: 600px">
       <div class="row horizontal v_center">
         <h2>支付總金額：</h2>
         <el-input v-model="state.total" style="width: 150px" @input="commaChange(state.total)" :disabled="state.isFinish"/>
@@ -16,8 +16,8 @@
       @delete:delete-item="deleteItem(i)"
       @add:add-total="addTotal(i)"
     />
-    <hr/>
-    <div class="row horizontal" data-space-top="1rem">
+    <hr style="width: 600px" align="left"/>
+    <div class="row horizontal" data-space-top="1rem" style="width: 600px">
       <div data-width="50%">
         <h1 data-space-bottom="1.5rem">已支付金額</h1>
         <p>{{ state.confirmPayment }}</p>
